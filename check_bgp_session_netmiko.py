@@ -71,7 +71,7 @@ def cmd(device, instance, device_type):
             show_bgp_neigh = net_connect.send_command('show ip bgp neighbor {}'.format(instance))
         elif device_type == 'cisco_ios':
             cmd = 'show ip bgp neighbor {}'.format(instance)
-            print(cmd)
+            #print(cmd)
             output += cmd
             output += '\n\n'
             show_bgp_neigh = net_connect.send_command(cmd)
@@ -84,6 +84,7 @@ def cmd(device, instance, device_type):
                 msg = 'Sessão BGP não encontrada!\n\n'
                 #print(msg)
                 output += msg
+                sys.exit(1)
 
             if bgp_state == 'Established':
                 bgp_uptime_ms = re.search(r'uptime: (\d+)', show_bgp_neigh).group(1)
@@ -124,7 +125,7 @@ def cmd(device, instance, device_type):
                     net_connect.disconnect()
 
             else:
-                msg = "{}: Sessão {} BGP is NOT UP. VERIFICANDO...\n\n".format(node, instance)
+                msg = "{}: BGP Session {} is NOT UP. Collecting Data...\n\n".format(node, instance)
                 output += msg
                 cmd = 'show ip route {}'.format(instance)
                 #print(cmd)
@@ -132,8 +133,12 @@ def cmd(device, instance, device_type):
                 output += '\n\n'
                 show_ip_route_neigh = net_connect.send_command(cmd)
                 output += show_ip_route_neigh
+                output += '\n\n'
                 ip_route_if = re.search(r'via (\w+[\d/]+)', show_ip_route_neigh).group(1)
-                int_conf = net_connect.send_command('show running interface {}'.format(ip_route_if))
+                cmd = 'show running interface {}'.format(ip_route_if)
+                output += cmd
+                output += '\n\n'
+                int_conf = net_connect.send_command(cmd)
                 #print(int_conf)
                 output += int_conf
                 output += '\n\n'
